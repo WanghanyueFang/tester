@@ -1,0 +1,257 @@
+---
+title: "Apartment Building Data Analysis: A Study on Property Types and Safety Service Plans"
+author:
+  - Wanghanyue Fang
+thanks: "A GitHub Repository containing all data, R code, and other files used in this investigation is located here: <https://github.com/WanghanyueFang/Apartment-Building-Toronto-Analysis-1.git>"
+date: 09-27-2024
+date-format: long
+abstract: "This study examines the condition and safety compliance of apartment buildings in Toronto, focusing on various property types, including private residences, social housing, and those managed by the Toronto Community Housing Corporation (TCHC). The analysis reveals that while private apartment buildings constitute the majority of the dataset, they often lag behind publicly managed properties in safety compliance. Additionally, many older buildings have been registered in recent years, raising concerns about their maintenance and safety standards. This research highlights the critical need for improved safety regulations and investment in affordable housing to ensure the well-being of residents in urban environment."
+format: pdf
+number-sections: true
+# The toc parameter used to create a table of contents was obtained from
+# Quarto documentation:
+# https://quarto.org/docs/reference/formats/pdf.html
+toc: true
+bibliography: references1.bib
+---
+
+
+```{r}
+#| echo: false
+#| warning: false
+#### Preamble ####
+
+# Purpose: Generates a paper titled "Apartment building data analysis" in PDF format when
+# rendered.
+# Author: Wanghanyue Fang
+# Date: Sep.27.2024
+# Contact: sophia.fang@mail.utoronto.ca
+# Pre-requisites: Run the files "01-download_data.R" and "02-data_cleaning.R".
+```
+
+```{r}
+#| echo: false
+#| warning: false
+#### Loading Packages ####
+
+# install.packages("tidyverse")
+# install.packages("here")
+#install.packages("opendatatoronto")
+#install.packages("tidyverse")
+library(opendatatoronto)
+library(tidyverse)
+library(here)
+library(knitr)
+```
+
+# Introduction {#sec-introduction}
+In recent years, the growing demand for affordable housing has brought increased attention to the management and condition of apartment buildings in urban areas. In cities like Toronto, apartment buildings play a critical role in housing a large proportion of the population, encompassing a range of property types such as private residences, social housing, and properties managed by public entities like the Toronto Community Housing Corporation (TCHC). These buildings require consistent oversight to ensure both safety and livability for residents, with particular emphasis on compliance with safety and service protocols, such as cleanliness, electrical safety, and timely maintenance.
+
+Given the challenges of urban density and aging infrastructure, examining the condition of apartment buildings in Toronto is essential. The dataset used in this analysis focuses on three primary aspects: property type distribution (private, social housing, and TCHC), year of construction and registration, and geographic location. Additionally, safety and service plans were assessed to evaluate the compliance and quality of critical safety protocols.
+
+This investigation aims to fill a gap in understanding how apartment buildings, particularly older or publicly managed ones, comply with safety standards that are crucial to tenant well-being. As detailed in the methodology section, this analysis relies on data sourced from Toronto's Open Data portal on apartment building evaluations. Prior studies on urban housing have highlighted the importance of safety compliance in improving living conditions for residents, especially in high-density urban environments @qi2014designing. Our findings, which are presented in the results section, reveal that private buildings make up the majority of the dataset, yet often fall behind in safety compliance when compared to publicly managed properties. As discussed later, these insights suggest the need for enhanced safety regulations, particularly for private property managers. The remainder of this paper is structured as follows: the data overview and analysis methods are covered in the next section, the results and discussion are in subsequent sections, and supplementary material is provided in the appendix.
+
+
+# Data {#sec-data}
+
+## Overview {#sec-data-overview}
+The dataset used in this analysis is the 2023 installment of the "Apartment Building Evaluations" dataset provided by the City of Toronto (City of Toronto, 2024). The dataset includes detailed evaluations of apartment buildings across Toronto, focusing on safety compliance, tenant services, and property management. Under @toronto_municipal_code_2024, building owners are required to submit regular evaluations of various safety standards, including electrical safety, cleaning logs, and service plans. This dataset is updated regularly to reflect current compliance levels across the city’s diverse range of apartment properties.
+
+The dataset covers three main property types: private housing, social housing, and Toronto Community Housing Corporation (TCHC) properties. Each building is evaluated based on multiple variables, such as the year the building was constructed, the year it was officially registered, its geographical location (latitude and longitude), and its performance on critical safety and service plans. The key variables analyzed in this paper are the property type, year of construction vs. year of registration, geographic distribution of properties, and safety and service plan scores.
+
+This dataset is part of Toronto’s Open Data initiative and can be accessed freely under the Open Government License. All analyses were conducted using the `R programming language`[@citeR] , with data cleaning performed using the `janitor`[@citejanitor] package, and visualizations generated using the `tidyverse`[@citetidyverse] package. The raw dataset was downloaded through the `opendatatoronto`[@citeopendatatoronto] package, and further cleaning steps were applied to ensure the integrity of the data used in this study.
+
+
+## Results {#sec-data-results}
+
+```{r}
+#| echo: false
+#| warning: false
+#| message: false
+#### Loading the Cleaned Dataset ####
+marriage_licence_packages <- search_packages("Apartment Building Evaluation")
+
+# Retrieve a list of all resources (datasets) available within the found package
+marriage_licence_resources <- marriage_licence_packages %>%
+  list_package_resources()
+# Display the list of resources available in the "Marriage Licence Statistics" package
+
+
+marriage_licence_statistics <- marriage_licence_resources[1 ,] %>%
+  get_resource()
+
+data = marriage_licence_statistics
+
+```
+
+After loading the dataset using the `R programming language` [@citeR] and the `here` package [@citehere], the `tidyverse` [@citetidyverse] package was employed to clean and visualize data. Various graphs were generated to provide insights into property type distribution, geographic locations, and safety service plan evaluations. The R code for the visualizations was adapted from [@tellingstorieswithdata], allowing for efficient generation of scatter plots, box plots, and geographic distributions.
+
+\newpage
+
+```{r}
+#| label: tbl-cleaned-data-1
+#| tbl-cap: Sample of cleaned lead data 
+#| echo: false
+cleaned_data <- read.csv("/Users/fangwanghanyue/Desktop/starter_folder-main 2/data1.csv")
+data1=cleaned_data[,c(3,7,12)]
+head(data1, 6) |>
+  kable(
+    col.names = c("RSN","PROPERTY.TYPE","CONFIRMED.UNITS"),
+    booktabs = TRUE
+    )
+```
+
+```{r}
+#| echo: false
+#| warning: false
+#| message: false
+#| label: fig-Distribution-of-Property-Type
+#| fig-cap: "Number of different property and how they distributed in Toronto in 2023 till now"
+
+#### First Graph Labels ####
+
+# This code is based on knowledge from Alexander (2023).
+
+# Preparing the necessary data to create the labels
+# Load necessary libraries
+# Load necessary libraries
+# Load necessary libraries
+library(ggplot2)
+library(dplyr)
+library(reshape2)  # Needed for melt function
+
+# Assuming 'data' is the dataset you've loaded.
+
+# 1. Distribution of Property Types
+ggplot(data, aes(x = `PROPERTY.TYPE`)) +
+  geom_bar(fill = "skyblue") +
+  theme_minimal() +
+  labs(x = "Property Type", y = "Count")
+
+```
+@fig-Distribution-of-Property-Type represents the counting for different property type in Toronto. There are three categories in the x-axis: private, social housing, and Toronto Community Housing Corporation (TCHC). The private sector dominates the chart with a significantly higher proportion than other two categories. It reaches a count of approximately 3000. The social housing has the smallest count. It has a much lower amount than both Private properties and TCHC, barely registering around 200. TCHC has a moderate count with arount 400 count. Overall, private properties are far more prevalent than both social housing and TCHC.
+
+\newpage
+
+```{r}
+#| label: tbl-cleaned-data-2
+#| tbl-cap: Sample of cleaned lead data 
+#| echo: false
+cleaned_data <- read.csv("/Users/fangwanghanyue/Desktop/starter_folder-main 2/data1.csv")
+data1=cleaned_data[,c(3,5,4)]
+head(data1, 6) |>
+  kable(
+    col.names = c("RSN","YEAR.BUILT","YEAR.REGISTERED"),
+    booktabs = TRUE
+    )
+```
+
+```{r}
+#| echo: false
+#| warning: false
+#| message: false
+#| label: fig-year-buildings-built-and-year-registered
+#| fig-cap: "Relationship between the year built (ranges from 1800s to the 2020s) and the registration years from 2018 to 2024"
+
+# 2. Year of Registration vs. Year Built
+ggplot(data, aes(x = `YEAR.BUILT`, y = `YEAR.REGISTERED`)) +
+  geom_point(alpha = 0.5, color = "blue") +
+  theme_minimal() +
+  labs(x = "Year Built", y = "Year Registered")
+
+```
+@fig-year-buildings-built-and-year-registered shows the relationship between two variables: x-axis represents the year built which appears a range from the 1800s to the 2000s; y-axis represents the year registered with the registration years spanning from 2018 to 2024. Many data points are clustered between te years 1900 and 2000 for the year built axis, with a noticeable increase in frequency around 1950 to 2020. There is a high concentration of buildings constructed during the 1900-2000 period, many of which were registered in recent years. There are a few scattered points in the 1800s for Year Built. These data points represnet much older buildings. This graph suggested that properties of various ages are being registered in recent years, with a significant number of older buildings registering in more recent years. 
+
+\newpage
+```{r}
+#| label: tbl-cleaned-data-3
+#| tbl-cap: Sample of cleaned lead data 
+#| echo: false
+cleaned_data <- read.csv("/Users/fangwanghanyue/Desktop/starter_folder-main 2/data1.csv")
+data1=cleaned_data[,c(69,70,12)]
+head(data1, 6) |>
+  kable(
+    col.names = c("LATITUDE","LONGITUDE","CONFIRMED.UNITS"),
+    booktabs = TRUE
+    )
+```
+
+```{r}
+#| echo: false
+#| warning: false
+#| label: fig-geographical-scatter-plot
+#| fig-cap: "Showing the distribution of properties based on their geographic coordinates(latitude and longitude)"
+
+# 3. Geographic Plot (Latitude vs Longitude)
+library(ggplot2)
+library(dplyr)
+library(reshape2) 
+
+ggplot(data, aes(x = LONGITUDE, y = LATITUDE)) +
+  geom_point(alpha = 0.5, color = "darkgreen") +
+  theme_minimal() +
+  labs(x = "Longitude", y = "Latitude")
+
+```
+@fig-geographical-scatter-plot has a x-axis representing longitude, ranging from -79.6 to -79.2, and a y-axis representing latitude, ranging from 43.6 to 43.8. The properties are represented as green dots, with a mix of both isolated points and clusters. There are dense clusters in specific areas, indicating regions with a high concentration of properties. The central region (in the middle of the graph) shows a particularly dense concentration, which likely represents an urban area or region with heavy development. Moving towards the outer edges of the plot, the points become more spread out and less dense, indicating areas with fewer properties or rural regions. This plot visually conveys where properties are located across a given geographic area and highlights which parts are densely populated with properties and which are more sparsely populated.
+
+\newpage
+
+```{r}
+#| echo: false
+#| warning: false
+#| label: fig-comparison-between-different-safety-plan
+#| fig-cap: "Box plot comparing different safety and service plans based on their scores"
+
+# 4. Safety and Service Plan Scores Boxplots
+# Combine all safety and service-related columns for comparison
+safety_service_columns <- data %>%
+  select(CLEANING.LOG, VITAL.SERVICE.PLAN, ELECTRICAL.SAFETY.PLAN, 
+         STATE.OF.GOOD.REPAIR.PLAN, TENANT.SERVICE.REQUEST.LOG)
+
+safety_service_melt <- melt(safety_service_columns)
+
+ggplot(safety_service_melt, aes(x = variable, y = value)) +
+  geom_boxplot(fill = "orange", color = "darkred") +
+  theme_minimal() +
+  labs(x = "Plan Type", y = "Score") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1, size = 10)) 
+```
+@fig-comparison-between-different-safety-plan has the x-axis represents various plan types and y-axis shows the corresponding scores. For Cleaning Log, has a median score close to 3 and a IQR spans from 2 to 3, with a lower range extending down to 0 indicating that there are some outliers. For Vital Service Plan, State of Good Repair Plan, and Tenant Service Request Plan, they only show single point at a score of 3, suggesting either no variation in scores or only one recorded data point.  The Electrical Safety Plan has a median score around 3 with an IQR about 1 to 3. The lower whisker extends down to 0, indicating a wide range of scores, including some very low outliers. Cleaning.Log and Electrical Safety Plan have the most variation in their scores, with Cleaning.log generally receiving higher scores. The other plan types all have consistent, high scores, with little to no variation.
+
+# Discussion {#sec-discussion}
+
+In the data analysis section, it was observed that private apartment buildings made up majority (over two-third) of the properties evaluated in Toronto, accounting for a significantly larger proportion compared to social housing and Toronto Community Housing Corporation (TCHC) (@fig-Distribution-of-Property-Type). Furthermore, a large number of buildings constructed between 1900 and 2000 were registered in recent years, highlighting a trend of older buildings entering the formal registration system (@fig-year-buildings-built-and-year-registered). The geographic analysis showed that apartment buildings are densely clustered in the central urban areas, with a more dispersed pattern toward the city's periphery (@fig-geographical-scatter-plot). Finally, when comparing safety and sevice plan scores, Cleaning Logs and Electrical Safety Plans displayed the most variation, with several outliers indicating poor compliance (@fig-comparison-between-different-safety-plan).
+
+These findings highlight several important trends in Toronto's apartment building landscape. The overwhelming dominance of private buildings in the dataset may reflect the broader trend of private sector investment in housing over the past several decades (discussed @griffin2003creating). This has been particularly pronounced in cities like Toronto (discussed @haider2004modeling), where rising property values have encouraged private developers to focus on maximizing profit rather than investing in affordable housing options. By contrast, the significantly lower numbers of social housing and TCHC properties suggest a need for increased public investment in affordable housing, especially given the affordability crisis in Toronto.
+
+The registration in recent years suggests that many properties may have been operating without formal oversight or updated standards for an extended period. This delay in registration could pose significant safety risks,@gyourko2015regulation, as older buildings are more likely to have structural or maintenance issues that could compromise tenant safety. This is further emphasized by the variation in safety compliance scores, particularly for Electrical Safety Plans, which saw lower scores and more outliers. The presence of these outliers suggests that some properties may be failing to meet even basic safety requirements, putting residents at risk.
+
+Despite the insights gained from this analysis, several limitations exist. First, the dataset only includes properties that have undergone formal evaluations, meaning that buildings not subject to regular inspections or registration requirements may have been excluded. This could lead to and underestimation of the safety issues in Toronto's apartment buildings. Additionally, the safety and service plan scores are self-reported by property managers, raising concerns about the accuracy of the data. If property managers underreport issues to avoid penalties, the true extent of safety violations may be significantly higher than reflected in the dataset.
+
+Further research should explore the long-term impact of delayed building registration on tenant safety, particularly in older apartment buildings. Additionally, further investigation into the effectiveness of safety compliance protocols in private versus public housing would provide a more comprehensive understanding of how different types of properties manage tenant safety. This analysis could be expanded to include comparisons with apartment buildings in other major Canadian cities to assess whether similar trends are occuring nationwide.
+```
+
+
+
+\newpage
+
+\appendix
+
+# Appendix {#sec-appendix}
+
+## Dataset and Graph Sketches {#sec-appendix-sketches}
+
+Sketches depicting both the desired dataset and the graphs generated in this analysis are available in the GitHub Repository.
+
+## Data Cleaning {#sec-appendix-cleaning}
+
+The data cleaning process involved filtering out some of the columns from the raw dataset and renaming some of the data entries for clarity and simplicity.
+
+## Attribution Statement {#sec-appendix-attribution}
+
+"Contains information licensed under the Open Government Licence – Toronto" [@tphlicense].
+
+\newpage
+
+# References {#sec-references}
